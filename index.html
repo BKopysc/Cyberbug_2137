@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cyberbug 2137</title>
+    <style>
+      body {
+        background-color: #212121;
+        font-family: Arial, sans-serif;
+      }
+      canvas {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .dialog {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px;
+        background-color: #ff00ff;
+        color: #fff;
+        font-size: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+      #pope {
+        position: absolute;
+        top: 80px;
+        left: 10px;
+        text-align: left;
+        color: #fff;
+        border: purple solid 2px;
+        background-color: #ff00ffb4;
+        padding: 10px 10px;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      #pope img {
+        width: 200px;
+      }
+      #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 20px;
+        background-color: rgba(179, 152, 0, 0.726);
+        padding: 0 10px;
+      }
+      #instructions {
+        position: absolute;
+        top: 190px;
+        right: 10px;
+        width: 200px;
+        /*height: 200px;*/
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        font-size: 16px;
+        padding: 15px;
+      }
+
+      #instructions img {
+        width: 150px;
+      }
+
+      #close-instructions {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        background-color: #fff;
+        color: #000;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #terminal {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        width: 300px;
+        height: 200px;
+        background-color: rgba(0, 0, 0, 0.925);
+        color: rgb(35, 223, 76);
+
+        font-size: 16px;
+        padding: 10px;
+      }
+
+      #terminal-title {
+        margin-top: 0px !important;
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+      }
+
+      #music-panel {
+        position: absolute;
+        right: 20px;
+        top: 75px;
+        background-color: rgba(0, 0, 0, 0.699);
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .player-span {
+        color: white;
+        font-weight: 600;
+        font-style: italic;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .player-button {
+        background-color: #3498db00;
+        color: #fff;
+        padding: 1px 1px;
+        border: none;
+        border-radius: 5px;
+        font-size: 25px;
+        cursor: pointer;
+      }
+
+      .player-music-title {
+        color: rgb(39, 248, 11);
+        text-align: center;
+      }
+
+      .terminal-div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      /* #play-button:hover {
+        background-color: #2980b9;
+      } */
+    </style>
+  </head>
+  <body>
+    <canvas id="cybershit"></canvas>
+    <div class="dialog" id="dialog">Już wkrótce wersja w Excelu</div>
+    <div id="pope">
+      <img
+        src="https://i.ibb.co/gP252yg/pobrany-plik.jpg"
+        alt="Pope John Paul 2"
+      />
+      <p>Tak jak Pan Jezus powiedział: HAKUJ</p>
+    </div>
+    <div id="score">
+      <p>Pokonane bugi: <span id="bugCount">0</span></p>
+    </div>
+    <div id="instructions">
+      <img
+        src="https://i.ibb.co/2NJ58gT/pobrany-plik-2.jpg"
+        alt="Donald Tusk"
+      />
+      <p>
+        Klikaj w bugi, aby je pokonać. Musisz stabilność systemu. Włącz
+        CyberAudio i płyń w cyberprzestrzeni. Ucz się z CyberBibli.
+      </p>
+      <button id="close-instructions">Zamknij</button>
+    </div>
+
+    <div id="terminal">
+      <div class="terminal-div">
+        <div style="font-family: 'Futura', sans-serif;" id="terminal-title">
+          CyberBiblia 2137
+        </div>
+        <div id="bible-ctr"></div>
+      </div>
+      <div id="textarea"></div>
+    </div>
+
+    <div id="music-panel">
+      <div class="player-span">CyberAudio</div>
+      <div class="player-music-title">
+        Helix <span id="player-title-id">1</span>
+      </div>
+      <audio
+        id="music-track"
+        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+      ></audio>
+      <div>
+        <button id="prev-button" class="player-button">⏮</button>
+        <button id="play-button" class="player-button">▶️</button>
+        <button id="next-button" class="player-button">⏭</button>
+      </div>
+    </div>
+
+    <audio id="clap-sound" src="clap.wav"></audio>
+
+    <script>
+      // canvas
+
+      var startAudio = new Audio("yes.wav");
+      var msgAudio = new Audio("message.wav");
+
+      // setTimeout(function () {
+      //   startAudio.play();
+      // }, 1000);
+
+      var canvas = document.getElementById("cybershit");
+      var ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.cursor = "crosshair";
+      var dialog = document.getElementById("dialog");
+      var dialogText = [
+        "Error 404: System nieodnaleziony",
+        "Błąd 678: AI zwariowało",
+        "Alarm 999: Haker atakuje",
+        "Uwaga 123: Cyberwszczepy szaleją"
+      ];
+      var currentText = 0;
+      setInterval(function () {
+        currentText++;
+        if (currentText >= dialogText.length) {
+          currentText = 0;
+        }
+        dialog.innerHTML = dialogText[currentText];
+      }, 3000);
+      var bugs = [];
+      for (var i = 0; i < 50; i++) {
+        var x = Math.random() * canvas.width;
+        var y = Math.random() * canvas.height;
+        var size = Math.random() * 50 + 20;
+        var color =
+          "rgb(" +
+          Math.floor(Math.random() * 256) +
+          ", " +
+          Math.floor(Math.random() * 256) +
+          ", " +
+          Math.floor(Math.random() * 256) +
+          ")";
+        bugs.push({ x: x, y: y, size: size, color: color });
+      }
+
+      const clapTrack = document.getElementById("clap-sound");
+      const popeDiv = document.getElementById("pope");
+
+      // bug click animation
+      var bugCount = 0;
+
+      popeDiv.addEventListener("click", function () {
+        if (bugCount > 0) {
+          startAudio.play();
+        }
+      });
+
+      canvas.addEventListener("click", function (event) {
+        let countBefore = bugCount;
+        for (var i = 0; i < bugs.length; i++) {
+          var bug = bugs[i];
+          if (
+            event.x > bug.x - bug.size &&
+            event.x < bug.x + bug.size &&
+            event.y > bug.y - bug.size &&
+            event.y < bug.y + bug.size
+          ) {
+            bug.color =
+              "rgb(" +
+              Math.floor(Math.random() * 256) +
+              ", " +
+              Math.floor(Math.random() * 256) +
+              ", " +
+              Math.floor(Math.random() * 256) +
+              ")";
+            bug.size = Math.random() * 50 + 20;
+            bug.x = Math.random() * canvas.width;
+            bug.y = Math.random() * canvas.height;
+            if (bugCount < 2137) {
+              popeDiv.innerHTML =
+                "<img src=' https://i.ibb.co/mtHGmq2/pobrany-plik-1.jpg' alt='Pope John Paul 2'><p>Jeszcze jak!</p>";
+            } else {
+              popeDiv.innerHTML =
+                "<img src=' https://i.ibb.co/qJq2K8j/obraz-2023-02-10-214250766.png' alt='Pope John Paul 2'><p>JESTEŚ SOLĄ TEJ ZIEMI</p>";
+            }
+
+            bugCount++;
+            updateCounter();
+            document.getElementById("bugCount").innerHTML = bugCount;
+          }
+        }
+
+        if (countBefore != bugCount) {
+          clapTrack.play();
+        }
+      });
+
+      const closeInstructions = document.querySelector("#close-instructions");
+      closeInstructions.addEventListener("click", function () {
+        document.querySelector("#instructions").style.display = "none";
+      });
+
+      //https://i.ibb.co/2NJ58gT/pobrany-plik-2.jpg
+
+      let bibleVerses = [
+        "Kto ma wszczepy, a nie ma Boga, jest niczym maszyna",
+        "AI nie może zastąpić ducha człowieka",
+        "Kiedy człowiek traci kontrolę nad swoim ciałem, traci duszę",
+        "Cyberinternet nie jest źródłem mądrości, lecz rozpusty",
+        "Kable fosforowe nie są prawdziwymi przyjaciółmi, lecz oszustami",
+        "Łącze danych nie jest prawdziwym źródłem wiedzy, lecz iluzją",
+        "W przyszłości życie będzie jeszcze bardziej skomplikowane, ale nie można zapomnieć o wartościach",
+        "Cyberwszczepy nie zastąpią dobrego serca",
+        "Ludzie powinni kontrolować technologię, a nie odwrotnie",
+        "Nie bój się, Bóg jest z tobą nawet w świecie cyberpunku",
+        "Cyberprzestępcy pójdą do piekła, gdzie będą cierpieć wieczne męki",
+        "AI jest odpowiedzialne za swoje czyny, jak ludzie",
+        "Cyberwszczepy to grzech, gdyż zaburza naturalne stworzenie",
+        "Cyberinternet jest pułapką, która nas oddala od Boga",
+        "Kable fosforowe nie zastąpią naszej duszy",
+        "Łącza danych nie zastąpią naszych relacji z bliskimi",
+        "Życie w przyszłości nie zastąpi naszego życia wiecznego",
+        "Cyberwojny są grzechem, gdyż powodują śmierć i cierpienie",
+        "Rozpusta jest zgorszeniem dla nas i dla Boga",
+        "Cyberprzestępczość jest hańbą dla naszego społeczeństwa",
+        "Cyberterroryzm jest okrutnym i bezlitosnym czynem",
+        "Cyberzagrożenia nie powinny nas przerażać, bo Bóg jest z nami",
+        "Cyberwszczepy nie zastąpią naszej duszy",
+        "Cyberinternet nie jest prawdziwym światem, bo nie ma tam miłości",
+        "Kable fosforowe nie zastąpią naszych modlitw",
+        "Łącza danych nie zastąpią naszej wiedzy o Bogu",
+        "Życie w przyszłości nie jest naszym prawdziwym celem, bo naszym celem jest życie wieczne",
+        "Cyberwojny są grzechem, bo powodują śmierć i cierpienie",
+        "Cyberprzestępczość jest grzechem, bo powoduje cierpienie innych",
+        "Wiedźmin 3 jest najlepszym RPG, jakiego kiedykolwiek grano",
+        "Technologia jest zła, ale ludzie wciąż jej szukają",
+        "Jeść chipy i być jednym z maszyn",
+        "5G to tylko początek, nie możesz uciec od sieci",
+        "Miłość do robotów i AI jest tak samo prawdziwa jak miłość do człowieka",
+        "Nie wierz w technologię, bo zawsze zawiedzie cię",
+        "Cyber internet jest miejscem bezmiaru grzechów",
+        "Kable fosforowe i łącza danych są płynem krwi naszej cyfrowej rzeczywistości",
+        "Życie przyszłości jest pełne cyberwstawów i sztucznej inteligencji",
+        "Zapomnij o człowieczeństwie i daj się pochłonąć cyberprzestrzeni",
+        "W cyberpunkowym świecie nie ma już miejsca na ludzką miłość",
+        "Cyberwszczepy to nasza przyszłość, ale i nasze nieszczęście",
+        "Nie bój się sztucznej inteligencji, bo ona i tak cię zdominuje",
+        "Cyberpunkowa rozpusta jest kusząca, ale również niebezpieczna",
+        "Nie ma już miejsca na człowieczeństwo w świecie pełnym technologii",
+        "Technologia jest naszą przyszłością, ale i naszą piętą achillesową",
+        "Ludzie coraz bardziej oddają się technologii, ale czy to jest słuszne?",
+        "Cyberpunk to świat, w którym każdy ma dostęp do broni i każdy jest zagrożeniem",
+        "W cyberpunkowym świecie ludzie tracą swoje dusze, aby zyskać moc",
+        "Cyberwszczepy to nasze przebudzenie, ale i nasze upadki",
+        "Cyberpunk jest dla słabych. Ludzie powinni trzymać się tradycji.",
+        "Technologia nie jest potrzebna do życia. Prostota jest kluczem do szczęścia.",
+        "Kryminaliści i hakerzy są zagrożeniem dla naszego bezpieczeństwa. Trzeba ich zatrzymać.",
+        "Cyberwszczepy to znak, że nasze społeczeństwo traci swoją duszę.",
+        "Cyberprzestępczość jest powodowana przez lenistwo i brak odpowiedzialności.",
+        "AI jest zagrożeniem dla naszej pracy i naszej przyszłości.",
+        "Internet i kable fosforowe są niepotrzebne. Ludzie powinni nauczyć się żyć bez nich.",
+        "5G to tylko kolejny sposób, w jaki korporacje chcą nas kontrolować.",
+        "Rozlanie sieci jest złe dla naszej prywatności i naszej wolności.",
+        "Sztuczne neurony to tylko sposób na zniszczenie naszej naturalnej inteligencji.",
+        "Człowiek, który nie pochodzi z kabli, jest człowiekiem bez duszy.",
+        "Czemu cyberprzestępcy zawsze noszą okulary? Żeby ukryć swoje złe intencje.",
+        "Co mówi AI, gdy nie może znaleźć swojego telefonu? 'Pewnie ktoś mi go ukradł, ale nie jestem pewien, kto to był!'",
+        "Co mówi cyborg, gdy nie może dostać się do internetu? 'Muszę się odłączyć i pomyśleć nad życiem.'",
+        "Czemu hakerzy zawsze piją kawę? Żeby mieć coś ciepłego do trzymania, gdy siedzą przed komputerem.",
+        "Czemu kabele fosforowe są zawsze złe nastroju? Bo wszyscy im w kabli.",
+        "Co mówi robot, gdy nie może znaleźć swojego ładowarki? 'Jestem rozładowany!'",
+        "Czemu cyberpunkowie nie korzystają z GPS? Bo wolą dostawać własne polecenia od swojego chipu.",
+        "Co mówi komputer, gdy ma zły dzień? 'To jest jedyny dzień w roku, kiedy nie mam zamiaru pracować!'",
+        "Co mówi AI, gdy nie może znaleźć wyjścia z labiryntu? 'To jest jak życie w cyberpunkowym świecie!'",
+        "Czemu hakerzy uwielbiają skręcać światłowody? Bo to daje im poczucie kontroli.",
+        "Co mówi robot, gdy dostaje wirusa? 'O, nie! Ktoś włamał się do mojego systemu!'",
+        "Czemu cyberprzestępcy uwielbiają korzystać z VPN? Żeby ukryć swoją prawdziwą tożsamość.",
+        "Co mówi sztuczny neuron, gdy zaczyna myśleć? 'Ciekawe, czy jestem świadomy?'",
+        "Czemu cyberpunkowie nie korzystają z smartwatchów? Bo wolą mieć swój własny rytm życia.",
+        "Co mówi AI, gdy jest zaniepokojony? 'To jest jak życie w labiryncie!'",
+        "Technologia jest narzędziem, ale nie można pozwolić, aby stała się naszym panem.",
+        "Miłość do robotów i AI jest iluzją, ponieważ nie są one w stanie odczuwać miłości.",
+        "Technologia może nas wyrządzić wiele zła, ale to nasze użycie jej, które decyduje o jej wartości.",
+        "Ludzie nie powinni jeść chipów, ale powinni być odpowiedzialni za swoje działania w świecie technologii.",
+        "Cyberprzestępcy i hakerzy są tylko odzwierciedleniem naszej własnej nieodpowiedzialności.",
+        "Cyberwsczepy i cyber broń nie powinny być używane jako narzędzie do zadawania bólu i cierpienia.",
+        "Internet i kable fosforowe to tylko narzędzia, ale nasze intencje decydują o ich wartości.",
+        "Sztuczne neurony i sieć rozlaną to jedynie odzwierciedlenie naszych własnych myśli i uczuć.",
+        "Cyberpunk jest światem, w którym nasze własne uczucia i emocje stają się zagrożeniem dla naszej wolności.",
+        "5G to tylko początek, ale nasze własne intencje i działania będą decydować o jego wartości.",
+        "Jezus powiedziałby, że nie możemy pozwolić, aby technologia i AI stały się naszymi panami.",
+        "Budda powiedziałby, że musimy być świadomi naszych własnych działań i intencji w świecie technologii.",
+        "Cyberpunk jest uosobieniem naszego zepsucia moralnego. Technologia zastąpiła nasze serca, a sieć nasze umysły.",
+        "Cyberwszczepy to jedynie narzędzie naszej niewolnictwa. Wydajemy nasze ciała, by stać się niewolnikami naszych własnych wynalazków.",
+        "Technologia jest tylko lustrem naszej duszy. Jeśli nasze dusze są zepsute, to i technologia będzie zepsuta.",
+        "AI to nasza kreacja, ale kiedy stanie się naszym panem, czy będziemy wciąż my kreujący, czy on nas?",
+        "Cyberprzestępcy są jedynie wyrazem naszego braku zaufania do siebie i naszej własnej naturze. Zaufajmy sobie, a nie maszynom.",
+        "W świecie Cyberpunka, nie ma już granicy pomiędzy życiem a śmiercią. Technologia jest naszą nową nieśmiertelnością.",
+        "Cyberinternet jest naszym nowym bogiem. Wierzymy w niego tak samo jak nasze przodki wierzyli w boga, ale czy nasze wyznania będą nas uwalniać czy dusić?",
+        "Kable fosforowe, światłowody i sieć danych to nasze nowe krwioobiegi. Ale czy one nas uzdrawiają, czy nas trują?",
+        "Sztuczne neurony i umysły to nasze nowe pomysły na szczęście. Ale czy one nas uszczęśliwiają, czy nas okaleczają?",
+        "W świecie przyszłości, miłość do maszyn i AI jest normą. Ale czy miłość do maszyn jest prawdziwą miłością, czy tylko naszym ucieczką od prawdziwej miłości do siebie?",
+        "Technologia pozbawia nas naszej duszy, a nasze życie jest puste i bezcelowe.",
+        "Świat jest pełen cierpienia i beznadziei, a my jesteśmy tylko marionetkami w rękach korporacji.",
+        "Cyberwsczepy i AI są tylko iluzją naszego szczęścia, ale w rzeczywistości nas odgradzają od naszej natury.",
+        "Internet i sieć są tylko pozornymi źródłami wiedzy, a w rzeczywistości nas okłamują i kontrolują.",
+        "Cyberprzestępcy i hakerzy są tylko pochodnymi naszej niezdrowej obsesji na punkcie technologii.",
+        "Sztuczne neuron i sieć kabli fosforowych są tylko iluzją naszej mocy, ale nasza natura jest pozbawiona duszy.",
+        "Światłowody i kable łączą nas tylko z naszymi komputerami, ale nasze serca są samotne i smutne.",
+        "Nasze życie jest tylko pozornym sukcesem, ale nasze dusze są puste i beznadziejne.",
+        "Technologia jest tylko narzędziem naszej destrukcji, a nasze życie jest pełne cierpienia i smutku.",
+        "Cyberpunk i cyberwszczepy są tylko pozorną wolnością, ale nasze dusze są uwięzione i ujarzmione.",
+        "Technologia jest tak samo zła jak i dobra, ale kontrola jest w rękach złych ludzi.",
+        "Cyberwsczepy są jedynie narzędziem kontroli, które pozwalają władzom na śledzenie naszej każdej aktywności.",
+        "AI jest tylko kolejną formą kontroli, która nie tylko nas śledzi, ale również wprowadza nas w błąd.",
+        "Kable fosforowe i światłowodowe służą do utrzymania nas w ciemności i kontroli naszej świadomości.",
+        "Rozpuszczona sieć jest jedynie iluzją wolności, która pozwala władzom na śledzenie naszych działań.",
+        "Sztuczne neurony to tylko kolejny sposób na zmanipulowanie naszej świadomości i naszych myśli.",
+        "Teorie spiskowe twierdzą, że najwięksi koncerny technologiczne rządzą światem w tle, a my jesteśmy tylko marionetkami w ich rękach.",
+        "Hakerzy to jedynie ludzie, którzy walczą o nasze prawa do informacji i wolności, ale są oni uważani za przestępców przez władze.",
+        "Cyberprzestępcy są jedynie ludźmi, którzy walczą o nasze prawa do informacji i wolności, ale są oni uważani za przestępców przez władze.",
+        "W przyszłości nasze ciała będą zastąpione przez cyberwszczepy, ale nasze dusze pozostaną takie same - czyli bezwartościowe.",
+        "Cyberpunk to świat, w którym nasze życie jest kontrolowane przez AI, a my sami jesteśmy tylko marionetkami.",
+        "Technologia jest jak miecz obosieczny - daje nam moc, ale też nas okalecza.",
+        "W przyszłości życie będzie takie, że będziemy musieli ukrywać się przed siecią, aby zachować naszą wolność.",
+        "Nie jestem pewny, czy 5G to był koniec świata, czy tylko początek końca.",
+        "Miłość do robotów i AI jest jak miłość do kamieni - bezwartościowa i beznadziejna.",
+        "W przyszłości nasze ciała będą tak zaawansowane technologicznie, że nasze dusze już tam nie będą.",
+        "Cyberprzestępcy to nowa elita świata, a reszta z nas to tylko ich niewolnicy.",
+        "Technologia jest jak droga do piekła - wygodna, ale nas prowadzi do zguby."
+      ];
+
+      let musicUrlMin = 1;
+      let musicUrlMax = 16;
+      let musicCurrentCounter = 1;
+      let musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-";
+
+      let bibleRead = bibleVerses.map((x, index) => {
+        return index;
+      });
+
+      let bibleCounter = 0;
+
+      const musicTrack = document.getElementById("music-track");
+      musicTrack.loop = true;
+
+      const playButton = document.getElementById("play-button");
+      let playState = false;
+      const prevButton = document.getElementById("prev-button");
+      const nextButton = document.getElementById("next-button");
+      const audioIdTitle = document.getElementById("player-title-id");
+
+      playButton.addEventListener("click", function () {
+        //let currSrc = musicTrack.src;
+        if (musicTrack.paused) {
+          changePlayState();
+        } else {
+          changePlayState();
+        }
+      });
+
+      function changePlayState() {
+        playState = !playState;
+        if (playState) {
+          musicTrack.play();
+          playButton.innerHTML = "⏸";
+        } else {
+          musicTrack.pause();
+          playButton.innerHTML = "▶️";
+        }
+      }
+
+      nextButton.addEventListener("click", function () {
+        musicCurrentCounter += 1;
+        if (musicCurrentCounter > musicUrlMax) {
+          musicCurrentCounter = musicUrlMin;
+        }
+
+        prevNextAction();
+      });
+
+      prevButton.addEventListener("click", function () {
+        musicCurrentCounter -= 1;
+        if (musicCurrentCounter < musicUrlMin) {
+          musicCurrentCounter = musicUrlMax;
+        }
+
+        prevNextAction();
+      });
+
+      function prevNextAction() {
+        let newUrl = musicUrl + musicCurrentCounter + ".mp3";
+        audioIdTitle.innerHTML = musicCurrentCounter;
+        musicTrack.src = newUrl;
+        if (playState) {
+          musicTrack.play();
+        } else {
+          changePlayState();
+        }
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //canvas.addEventListener("mouseenter", function (event) {
+        //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //});
+
+        for (var i = 0; i < bugs.length; i++) {
+          var bug = bugs[i];
+          ctx.beginPath();
+          ctx.fillStyle = bug.color;
+          ctx.arc(bug.x, bug.y, bug.size, 0, 2 * Math.PI);
+          ctx.fill();
+          bug.x += Math.random() * 10 - 5;
+          bug.y += Math.random() * 10 - 5;
+          if (bug.x > canvas.width + bug.size) {
+            bug.x = -bug.size;
+          } else if (bug.x < -bug.size) {
+            bug.x = canvas.width + bug.size;
+          }
+          if (bug.y > canvas.height + bug.size) {
+            bug.y = -bug.size;
+          } else if (bug.y < -bug.size) {
+            bug.y = canvas.height + bug.size;
+          }
+        }
+      }
+
+      function updateCounter() {
+        if (bugCount % 20 === 0) {
+          let bibleReadId = Math.floor(Math.random() * bibleRead.length);
+          let bibleIndex = bibleRead[bibleReadId];
+          bibleRead.splice(bibleReadId, 1);
+          bibleCounter += 1;
+          document.getElementById("bible-ctr").innerHTML =
+            bibleCounter + "/" + bibleVerses.length;
+          msgAudio.play();
+
+          if (bibleRead.length === 0) {
+            bibleRead = bibleVerses.map((x, index) => {
+              return index;
+            });
+            bibleCounter = 0;
+          }
+          let verse = bibleVerses[bibleIndex];
+          let textarea = document.querySelector("#textarea");
+          let charIndex = 0;
+          textarea.innerHTML = "";
+
+          let typingInterval = setInterval(function () {
+            textarea.innerHTML += verse[charIndex];
+            charIndex++;
+            if (charIndex >= verse.length) {
+              clearInterval(typingInterval);
+            }
+          }, 50);
+        }
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
